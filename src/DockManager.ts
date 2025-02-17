@@ -19,6 +19,7 @@ import { IDockContainerWithSize } from "./interfaces/IDockContainerWithSize.js";
 import { DockConfig } from "./DockConfig.js";
 import { PanelType } from "./enums/PanelType.js";
 import { IState } from "./interfaces/IState.js";
+import { RootContainer } from "./RootContainer.js";
 
 /**
  * Dock manager manages all the dock panels in a hierarchy, similar to visual studio.
@@ -49,6 +50,7 @@ export class DockManager {
     private _config: DockConfig;
     private _activePanel: PanelContainer;
     private _lastPanelNotADialog: PanelContainer;
+    private _rootContainer: RootContainer;
 
     private _activeDocument: PanelContainer;
 
@@ -73,9 +75,11 @@ export class DockManager {
         this.backgroundContext = this.element.children[0] as HTMLElement;
         this.context = new DockManagerContext(this);
         let documentNode = new DockNode(this.context.documentManagerView);
+        this._rootContainer = new RootContainer(this);
         this.context.model.rootNode = documentNode;
         this.context.model.documentManagerNode = documentNode;
         this.context.model.dialogs = [];
+        this.context.model.stickyPanels = [];
         this.setRootNode(this.context.model.rootNode);
         // Resize the layout
         this.resize(this.element.clientWidth, this.element.clientHeight);
@@ -204,7 +208,7 @@ export class DockManager {
     resize(width: number, height: number) {
         this.element.style.width = width + 'px';
         this.element.style.height = height + 'px';
-        this.context.model.rootNode.container.resize(width, height);
+        this._rootContainer.resize(width, height);
 
         let offsetX = 0, offsetY = 0;
         for (let dialog of this.context.model.dialogs) {
@@ -253,7 +257,7 @@ export class DockManager {
         // Attach the new node to the dock manager's base element and set as root node
         node.detachFromParent();
         this.context.model.rootNode = node;
-        this.element.appendChild(node.container.containerElement);
+        this._rootContainer.containerElement.appendChild(node.container.containerElement);
     }
 
     _onDialogDragStarted(sender: Dialog, e) {

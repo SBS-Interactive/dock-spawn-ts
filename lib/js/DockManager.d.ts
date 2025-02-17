@@ -42,6 +42,7 @@ export declare class DockManager {
     private _config;
     private _activePanel;
     private _lastPanelNotADialog;
+    private _rootContainer;
     private _activeDocument;
     constructor(element: HTMLElement, config?: DockConfig);
     get config(): DockConfig;

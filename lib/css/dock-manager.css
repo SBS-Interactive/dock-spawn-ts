@@ -409,3 +409,12 @@
 	-ms-user-select: none;
 	cursor: default;
 }
+
+/*************************** Sticky panels **************************/
+.dockspawn-root-element>.dockspawn-vertical-pins-row {
+	display: inline-block;
+}
+
+.dockspawn-bottom-pins-tab-container {
+	background-color: red;
+}
