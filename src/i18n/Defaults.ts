@@ -9,7 +9,9 @@ export const Defaults = {
     'CloseAll': 'Close all documents',
     'CloseAllButThis': 'Close all documents but this',
     'DefaultPanelName': 'Panel',
-    'NewBrowserWindow': 'Open in new window'
+    'NewBrowserWindow': 'Open in new window',
+    'AutoHide': 'Auto Hide',
+    'Dock': 'Dock'
     //Example of parameterized translation
     // 'CloseWithName': 'Close tab {0}'
 };

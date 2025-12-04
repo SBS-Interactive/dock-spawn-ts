@@ -17,6 +17,7 @@ import { IState } from "./interfaces/IState.js";
 import { PanelContainer } from "./PanelContainer.js";
 import { Point } from "./Point.js";
 import { SplitterDockContainer } from "./SplitterDockContainer.js";
+import { StickyContainer } from "./StickyContainer.js";
 import { TabPage } from "./TabPage.js";
 import { Utils } from "./Utils.js";
 
@@ -28,6 +29,7 @@ import { Utils } from "./Utils.js";
 export class DockManager {
 
     public element: HTMLElement;
+    public stickyContainer: StickyContainer;
     public context: DockManagerContext;
     public dockWheel: DockWheel;
     public layoutEngine: DockLayoutEngine;
@@ -69,8 +71,16 @@ export class DockManager {
         return this._config;
     }
 
+    get dockingArea(): HTMLElement {
+        return this.stickyContainer.dockingArea;
+    }
+
     initialize() {
         this.backgroundContext = this.element.children[0] as HTMLElement;
+
+        this.stickyContainer = new StickyContainer(this);
+
+
         this.context = new DockManagerContext(this);
         let documentNode = new DockNode(this.context.documentManagerView);
         this.context.model.rootNode = documentNode;
@@ -93,7 +103,7 @@ export class DockManager {
         }
 
         this.onKeyPressBound = this.onKeyPress.bind(this);
-        this.element.addEventListener('keydown', this.onKeyPressBound);
+        this.dockingArea.addEventListener('keydown', this.onKeyPressBound);
     }
 
     onKeyPress(e: KeyboardEvent) {
@@ -110,7 +120,7 @@ export class DockManager {
         if (this._config.moveOnlyWithinDockConatiner)
             return this.checkXBoundsWithinDockContainer(container, currentMousePosition, previousMousePosition, resizeWest, resizeEast);
 
-        let rect = this.element.getBoundingClientRect();
+        let rect = this.dockingArea.getBoundingClientRect();
         let dx = Math.floor(currentMousePosition.x - previousMousePosition.x);
         let leftBounds = container.offsetLeft + container.offsetWidth + dx + rect.left < 40; // || (container.offsetLeft + container.offsetWidth + dx - 40 ) < 0;
         let rightBounds = container.offsetLeft + dx + rect.left > (window.innerWidth - 40);
@@ -133,7 +143,7 @@ export class DockManager {
 
     checkXBoundsWithinDockContainer(container: HTMLElement, currentMousePosition: Point, previousMousePosition: Point, resizeWest: boolean, resizeEast: boolean) {
         let dx = currentMousePosition.x - previousMousePosition.x;
-        let bbOuter = this.element.getBoundingClientRect();
+        let bbOuter = this.dockingArea.getBoundingClientRect();
         let bbInner = container.getBoundingClientRect();
         let leftBounds = dx < 0 && bbInner.left + dx < bbOuter.left && !resizeEast;
         let rightBounds = dx > 0 && bbInner.right + dx > bbOuter.right && !resizeWest;
@@ -154,7 +164,7 @@ export class DockManager {
         if (this._config.moveOnlyWithinDockConatiner)
             return this.checkYBoundsWithinDockContainer(container, currentMousePosition, previousMousePosition, resizeNorth, resizeSouth);
 
-        let rect = this.element.getBoundingClientRect();
+        let rect = this.dockingArea.getBoundingClientRect();
         let dy = Math.floor(currentMousePosition.y - previousMousePosition.y);
         let topBounds = container.offsetTop + dy < 0;
         let bottomBounds = container.offsetTop + dy + rect.top > (window.innerHeight - 16);
@@ -173,7 +183,7 @@ export class DockManager {
 
     checkYBoundsWithinDockContainer(container: HTMLElement, currentMousePosition: Point, previousMousePosition: Point, resizeNorth: boolean, resizeSouth: boolean) {
         let dy = currentMousePosition.y - previousMousePosition.y;
-        let bbOuter = this.element.getBoundingClientRect();
+        let bbOuter = this.dockingArea.getBoundingClientRect();
         let bbInner = container.getBoundingClientRect();
         let topBounds = dy < 0 && bbInner.top + dy < bbOuter.top && !resizeSouth;
         let bottomBounds = dy > 0 && bbInner.bottom + dy > bbOuter.bottom && !resizeNorth;
@@ -204,7 +214,7 @@ export class DockManager {
     resize(width: number, height: number) {
         this.element.style.width = width + 'px';
         this.element.style.height = height + 'px';
-        this.context.model.rootNode.container.resize(width, height);
+        this.stickyContainer.resize(width, height);
 
         let offsetX = 0, offsetY = 0;
         for (let dialog of this.context.model.dialogs) {
@@ -254,7 +264,7 @@ export class DockManager {
         // Attach the new node to the dock manager's base element and set as root node
         node.detachFromParent();
         this.context.model.rootNode = node;
-        this.element.appendChild(node.container.containerElement);
+        this.dockingArea.appendChild(node.container.containerElement);
     }
 
     _onDialogDragStarted(sender: Dialog, e) {

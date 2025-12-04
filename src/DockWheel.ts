@@ -76,20 +76,20 @@ export class DockWheel {
         let baseX = Math.floor(containerWidth / 2); // + element.offsetLeft;
         let baseY = Math.floor(containerHeight / 2); // + element.offsetTop;
         let bcElement = element.getBoundingClientRect();
-        let bcdockManagerElement = this.dockManager.element.getBoundingClientRect()
+        let bcdockManagerElement = this.dockManager.dockingArea.getBoundingClientRect()
         this.elementMainWheel.style.left = (bcElement.left - bcdockManagerElement.left + baseX) + 'px';
         this.elementMainWheel.style.top = (bcElement.top - bcdockManagerElement.top + baseY) + 'px';
 
         // The positioning of the main dock wheel buttons is done automatically through CSS
         // Dynamically calculate the positions of the buttons on the extreme sides of the dock manager
         let sideMargin = 20;
-        let dockManagerWidth = this.dockManager.element.clientWidth;
-        let dockManagerHeight = this.dockManager.element.clientHeight;
+        let dockManagerWidth = this.dockManager.dockingArea.clientWidth;
+        let dockManagerHeight = this.dockManager.dockingArea.clientHeight;
 
         Utils.removeNode(this.elementMainWheel);
         Utils.removeNode(this.elementSideWheel);
-        this.dockManager.element.appendChild(this.elementMainWheel);
-        this.dockManager.element.appendChild(this.elementSideWheel);
+        this.dockManager.dockingArea.appendChild(this.elementMainWheel);
+        this.dockManager.dockingArea.appendChild(this.elementSideWheel);
 
         this._setWheelButtonPosition(WheelTypes["left-s"], sideMargin, -dockManagerHeight / 2);
         this._setWheelButtonPosition(WheelTypes["right-s"], dockManagerWidth - sideMargin * 2, -dockManagerHeight / 2);
@@ -150,7 +150,7 @@ export class DockWheel {
         }
 
         if (bounds) {
-            this.dockManager.element.appendChild(this.elementPanelPreview);
+            this.dockManager.dockingArea.appendChild(this.elementPanelPreview);
             this.elementPanelPreview.style.left = Math.round(bounds.x) + 'px';
             this.elementPanelPreview.style.top = Math.round(bounds.y) + 'px';
             this.elementPanelPreview.style.width = Math.round(bounds.width) + 'px';

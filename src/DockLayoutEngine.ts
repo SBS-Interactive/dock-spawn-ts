@@ -299,7 +299,7 @@ export class DockLayoutEngine {
             // Since this is a fill operation, the highlight bounds is the same as the reference node
             // TODO: Create a tab handle highlight to show that it's going to be docked in a tab
             let targetElement = referenceNode.container.containerElement;
-            let outerRect = this.dockManager.element.getBoundingClientRect();
+            let outerRect = this.dockManager.dockingArea.getBoundingClientRect();
             let targetElementRect = targetElement.getBoundingClientRect();
             return { x: targetElementRect.left - outerRect.left, y: targetElementRect.top - outerRect.top, width: targetElement.clientWidth, height: targetElement.clientHeight };
         }
@@ -348,7 +348,7 @@ export class DockLayoutEngine {
         }
 
         bounds = {};
-        let outerRect = this.dockManager.element.getBoundingClientRect();
+        let outerRect = this.dockManager.dockingArea.getBoundingClientRect();
         let rect = compositeNode.container.containerElement.getBoundingClientRect();
         if (direction === 'vertical') {
             bounds.x = rect.left - outerRect.left;

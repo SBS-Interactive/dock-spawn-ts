@@ -41,6 +41,8 @@ export * from './ResizeHandle.js';
 export * from './SplitterBar.js';
 export * from './SplitterDockContainer.js';
 export * from './SplitterPanel.js';
+export * from './StickyContainer.js';
+export * from './StickyPanel.js';
 export * from './TabHandle.js';
 export * from './TabHost.js';
 export * from './TabPage.js';

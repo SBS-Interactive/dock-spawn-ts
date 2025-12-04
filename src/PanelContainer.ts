@@ -179,6 +179,15 @@ export class PanelContainer implements IDockContainerWithSize, IContextMenuProvi
     static createContextMenuContentCallback = (panelContainer: PanelContainer): Node[] => {
         const result = [];
 
+        const autoHideButton: HTMLElement = document.createElement('div');
+        autoHideButton.innerText = Localizer.getString('AutoHide');
+        result.push(autoHideButton);
+
+        autoHideButton.onclick = () => {
+            panelContainer.dockManager.stickyContainer.pinLeftAsync(panelContainer);
+            panelContainer.closeContextMenu();
+        }
+
         if (panelContainer.dockManager.config.enableBrowserWindows) {
             let btnNewBrowserWindow = document.createElement('div');
             btnNewBrowserWindow.innerText = Localizer.getString('NewBrowserWindow');

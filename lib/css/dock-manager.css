@@ -409,3 +409,39 @@
 	-ms-user-select: none;
 	cursor: default;
 }
+
+/*************************** Sticky panels **************************/
+
+.dockspawn-sticky-container {
+	display: grid;
+}
+
+.dockspawn-sticky-container-docking-area {
+	grid-area: 2 / 2;
+}
+
+.dockspawn-sticky-tabrow {
+	display: flex;
+	overflow: hidden;
+}
+
+.dockspawn-sticky-tabrow-vertical {
+	transform: rotate(90deg) translateY(-100%);
+	transform-origin: top left;
+}
+
+.dockspawn-sticky-tabrow-left {
+	grid-area: 2 / 1;
+}
+
+.dockspawn-sticky-tabrow-right {
+	grid-area: 2 / 3;
+}
+
+.dockspawn-sticky-tabrow-bottom {
+	grid-area: 3 / 2;
+}
+
+.dockspawn-sticky-tabrow-top {
+	grid-area: 1 / 2;
+}
