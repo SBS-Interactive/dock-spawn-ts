@@ -1,10 +1,11 @@
 import { DockManager } from "./DockManager.js";
-import { Point } from "./Point.js";
-import { PanelContainer } from "./PanelContainer.js";
-import { DraggableContainer } from "./DraggableContainer.js";
-import { ResizableContainer } from "./ResizableContainer.js";
-import { EventHandler } from "./EventHandler.js";
 import { DockNode } from "./DockNode.js";
+import { DraggableContainer } from "./DraggableContainer.js";
+import { EventHandler } from "./EventHandler.js";
+import { PanelContainer } from "./PanelContainer.js";
+import { Point } from "./Point.js";
+import { ResizableContainer } from "./ResizableContainer.js";
+import { ResizeDirection } from "./enums/ResizeDirection.js";
 export declare class Dialog {
     elementDialog: HTMLDivElement & {
         floatingDialog: Dialog;
@@ -15,7 +16,7 @@ export declare class Dialog {
     eventListener: DockManager;
     position: Point;
     resizable: ResizableContainer;
-    disableResize: boolean;
+    resizeDirection: ResizeDirection;
     mouseDownHandler: any;
     onKeyPressBound: any;
     noDocking: boolean;
@@ -26,7 +27,8 @@ export declare class Dialog {
     contextmenuHandler: EventHandler;
     _ctxMenu: HTMLDivElement;
     _windowsContextMenuCloseBound: any;
-    constructor(panel: PanelContainer, dockManager: DockManager, grayoutParent?: PanelContainer, disableResize?: boolean);
+    static defaultResizeDirection: ResizeDirection;
+    constructor(panel: PanelContainer, dockManager: DockManager, grayoutParent?: PanelContainer, resizeDirection?: ResizeDirection);
     saveState(x: number, y: number): void;
     static fromElement(id: string, dockManager: DockManager): Dialog;
     _initialize(): void;
