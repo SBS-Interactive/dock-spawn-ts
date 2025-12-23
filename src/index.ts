@@ -16,6 +16,7 @@ export * from './interfaces/ISize.js';
 export * from './interfaces/IState.js';
 export * from './interfaces/IThickness.js';
 export * from './BrowserDialogHelper.js';
+export * from './BufferedResizeDecorator.js';
 export * from './ContainerType.js';
 export * from './Dialog.js';
 export * from './DockConfig.js';

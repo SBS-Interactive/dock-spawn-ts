@@ -414,6 +414,8 @@
 
 .dockspawn-sticky-container {
 	display: grid;
+	grid-template-columns: auto minmax(0, 1fr) auto;
+	grid-template-rows: auto minmax(0, 1fr) auto;
 }
 
 .dockspawn-sticky-container-docking-area {
@@ -426,8 +428,27 @@
 }
 
 .dockspawn-sticky-tabrow-vertical {
-	transform: rotate(90deg) translateY(-100%);
-	transform-origin: top left;
+	flex-direction: column;
+}
+
+.dockspawn-sticky-tabrow>* {
+	height: 22px;
+	padding-inline: 10px;
+	text-decoration-line: underline;
+	text-decoration-color: gray;
+	text-decoration-thickness: 3px;
+}
+
+.dockspawn-sticky-tabrow>*:hover {
+	/* TODO: déplacer les couleurs dans le fichier style */
+	text-decoration-color: blue;
+	cursor:pointer;
+}
+
+.dockspawn-sticky-tabrow-vertical>* {
+	height: auto;
+	width: 22px;
+	writing-mode: vertical-rl;
 }
 
 .dockspawn-sticky-tabrow-left {

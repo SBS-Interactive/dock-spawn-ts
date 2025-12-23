@@ -179,14 +179,43 @@ export class PanelContainer implements IDockContainerWithSize, IContextMenuProvi
     static createContextMenuContentCallback = (panelContainer: PanelContainer): Node[] => {
         const result = [];
 
-        const autoHideButton: HTMLElement = document.createElement('div');
-        autoHideButton.innerText = Localizer.getString('AutoHide');
-        result.push(autoHideButton);
+        //TODO
+        const autoHideButtonLeft: HTMLElement = document.createElement('div');
+        autoHideButtonLeft.innerText = `${Localizer.getString('AutoHide')} left`;
+        result.push(autoHideButtonLeft);
 
-        autoHideButton.onclick = () => {
+        autoHideButtonLeft.onclick = () => {
             panelContainer.dockManager.stickyContainer.pinLeftAsync(panelContainer);
             panelContainer.closeContextMenu();
         }
+
+        const autoHideButtonRight: HTMLElement = document.createElement('div');
+        autoHideButtonRight.innerText = `${Localizer.getString('AutoHide')} Right`;
+        result.push(autoHideButtonRight);
+
+        autoHideButtonRight.onclick = () => {
+            panelContainer.dockManager.stickyContainer.pinRightAsync(panelContainer);
+            panelContainer.closeContextMenu();
+        }
+
+        const autoHideButtonBottom: HTMLElement = document.createElement('div');
+        autoHideButtonBottom.innerText = `${Localizer.getString('AutoHide')} Bottom`;
+        result.push(autoHideButtonBottom);
+
+        autoHideButtonBottom.onclick = () => {
+            panelContainer.dockManager.stickyContainer.pinBottomAsync(panelContainer);
+            panelContainer.closeContextMenu();
+        }
+
+        const autoHideButtonTop: HTMLElement = document.createElement('div');
+        autoHideButtonTop.innerText = `${Localizer.getString('AutoHide')} Top`;
+        result.push(autoHideButtonTop);
+
+        autoHideButtonTop.onclick = () => {
+            panelContainer.dockManager.stickyContainer.pinTopAsync(panelContainer);
+            panelContainer.closeContextMenu();
+        }
+        
 
         if (panelContainer.dockManager.config.enableBrowserWindows) {
             let btnNewBrowserWindow = document.createElement('div');

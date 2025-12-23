@@ -1,54 +1,87 @@
-import { Dialog } from "./Dialog.js";
-import { DockManager } from "./DockManager.js";
-import { ResizeDirection } from "./enums/ResizeDirection.js";
-import { ILayoutEventListener, Localizer, StickyContainer } from "./index-webcomponent.js";
-import { PanelContainer } from "./PanelContainer.js";
+import { BufferedResizeDecorator } from './BufferedResizeDecorator.js';
+import { DockManager } from './DockManager.js';
+import { ResizeDirection } from './enums/ResizeDirection.js';
+import { FloatingPanel } from './FloatingPanel.js';
+import { Localizer } from './i18n/Localizer.js';
+import { ILayoutEventListener } from './interfaces/ILayoutEventListener.js';
+import { PanelContainer } from './PanelContainer.js';
+import { ResizableContainer } from './ResizableContainer.js';
+import { StickyContainer } from './StickyContainer.js';
 
-export class StickyPanel extends Dialog {
+export class StickyPanel extends FloatingPanel {
     private readonly _stickyContainer;
     private readonly _activePanelListener: ILayoutEventListener;
+    private readonly _resizableContainer: ResizableContainer;
+    private readonly _resizeCache: BufferedResizeDecorator;
+
+    public static defaultPanelWidth: number = 400;
+    public static defaultPanelHeight: number = 250;
 
     constructor(
         panel: PanelContainer, 
         dockManager: DockManager,
         stickyContainer: StickyContainer,
-        x: number, 
-        y: number,
         resizeDirection: ResizeDirection
     ) {
-        panel.isDialog = true;
-
-        super(panel, dockManager, null, false);
-
-        this.draggable.removeDecorator();
-        this.draggable = null;
-
-        this.setPosition(x, y);
-
-        requestAnimationFrame(() => this.hide());
+        super(panel, dockManager);
 
         this._stickyContainer = stickyContainer;
         this._activePanelListener = {
-            onActivePanelChange: (dockManager, panel) => {
+            onActivePanelChange: (_dockManager, panel) => {
                 if (panel != this.panel) {
                     this.hide();
-
-                    dockManager.removeLayoutListener(this._activePanelListener);
                 }
             }
-        }        
+        }    
+        
+        panel.width = StickyPanel.defaultPanelWidth;
+        panel.height = StickyPanel.defaultPanelHeight;
+
+        this._resizableContainer = new ResizableContainer(
+            this,
+            panel,
+            this.element,
+            resizeDirection);
+
+        this._resizeCache = new BufferedResizeDecorator(this._resizableContainer);
+
+
+        this._resizableContainer.onUserResize = (width, height) => this._resizeCache.resize(width, height);
+
+        this.decoratedContainer = this._resizeCache;
     }
 
-    public override show(): void {
-        this.dockManager.addLayoutListener(this._activePanelListener);
-        this.onFocus();
+    //TEMP
+    public override setPosition(x: number, y: number): void {
+        super.setPosition(x, y);
+    }
 
-        super.show();
+    public override initialize(): void {
+        super.initialize();
+        this.hide();
+    }
+
+    public override resize(width: number, height: number): void {
+        super.resize(width, height);
+
+        if (!this.isHidden) {
+            this._resizeCache.performResize();
+        }
+    }
+
+    protected override onShow(): void {
+        this.dockManager.addLayoutListener(this._activePanelListener);
+        this._resizeCache.performResize();
+        this.onFocus();
+    }
+
+    protected override onHide(): void {
+        this.dockManager.removeLayoutListener(this._activePanelListener);
     }
 
     public override destroy(): void {
         this.dockManager.removeLayoutListener(this._activePanelListener);
-
+        this._resizableContainer.removeDecorator();
         super.destroy();
     }
 
@@ -66,8 +99,7 @@ export class StickyPanel extends Dialog {
         };
 
         return [
-            dockButton,
-            ...super.createContextMenuItems()
+            dockButton
         ];
     }
 }

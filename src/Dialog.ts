@@ -53,6 +53,8 @@ export class Dialog extends FloatingPanel {
         this.dockManager.context.model.dialogs.push(this);
         this.position = this.dockManager.defaultDialogPosition;
         this.dockManager.notifyOnCreateDialog(this);
+
+        this.bringToFront();
     }
 
     public saveState(x: number, y: number): void {

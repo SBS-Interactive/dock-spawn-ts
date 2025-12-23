@@ -58,8 +58,6 @@ export abstract class FloatingPanel implements IContextMenuProvider {
         this.resize(
             this.panel.elementPanel.clientWidth,
             this.panel.elementPanel.clientHeight);
-
-        this.bringToFront();
     }
 
     public abstract createContextMenuItems(): Node[];
@@ -74,6 +72,7 @@ export abstract class FloatingPanel implements IContextMenuProvider {
         this.panel.elementContentContainer.style.zIndex = <any>this.dockManager.zIndexDialogCounter++;
         this.element.style.zIndex = <any>this.dockManager.zIndexDialogCounter++;
         this.element.style.display = 'block';
+        this.panel.elementContentContainer.style.display = 'block';
 
         if (this.isHidden) {
             this.isHidden = false;
@@ -85,6 +84,7 @@ export abstract class FloatingPanel implements IContextMenuProvider {
         this.element.style.zIndex = '0';
         this.panel.elementContentContainer.style.zIndex = '';
         this.element.style.display = 'none';
+        this.panel.elementContentContainer.style.display = 'none';
 
         if (!this.isHidden) {
             this.isHidden = true;
@@ -169,5 +169,13 @@ export abstract class FloatingPanel implements IContextMenuProvider {
 
     public get element(): HTMLDivElement & { floatingPanel: FloatingPanel } {
         return this._element;
+    }
+
+    public get width(): number {
+        return this.decoratedContainer.width;
+    }
+
+    public get height(): number {
+        return this.decoratedContainer.height;
     }
 }

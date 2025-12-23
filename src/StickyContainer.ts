@@ -1,7 +1,8 @@
-import { DockManager } from "./DockManager.js";
-import { ResizeDirection } from "./enums/ResizeDirection.js";
-import { PanelContainer } from "./PanelContainer.js";
-import { StickyPanel } from "./StickyPanel.js";
+import { DockManager } from './DockManager.js';
+import { ResizeDirection } from './enums/ResizeDirection.js';
+import { PanelContainer } from './PanelContainer.js';
+import { StickyPanel } from './StickyPanel.js';
+
 
 type StickyTabContext = {
     container: PanelContainer;
@@ -27,7 +28,6 @@ export class StickyContainer {
     private readonly _topTabs: Array<StickyTabContext> = [];
 
     public get hasLeftTabs(): boolean {
-        console.log('hasLeft', this._leftTabs.length > 0);
         return this._leftTabs.length > 0;
     }
 
@@ -72,13 +72,14 @@ export class StickyContainer {
         this._topTabsContainer = document.createElement('div');
         this._topTabsContainer.classList.add(
             'dockspawn-sticky-tabrow',
-            'dockspawn-sticky-tabrow-bottom');
+            'dockspawn-sticky-tabrow-top');
 
         this.element.append(
             this._leftTabsContainer,
-            this.dockingArea,
             this._rightTabsContainer,
-            this._bottomTabsContainer);
+            this._bottomTabsContainer,
+            this._topTabsContainer,
+            this.dockingArea);
 
         this._dockManager.element.appendChild(this.element);
     }
@@ -98,58 +99,137 @@ export class StickyContainer {
         const bottomTabsHeight = this.hasBottomTabs
             ? StickyContainer._tabsHeight
             : 0;
-        
-        this.element.style.gridTemplateRows = `minmax(0, 1fr) ${bottomTabsHeight}px`;
-        this.element.style.gridTemplateColumns = `${leftTabsWidth}px minmax(0, 1fr) ${rightTabsWidth}px`;
 
-        //Rotated by css
-        this._leftTabsContainer.style.width = `${height}px`;
-        this._leftTabsContainer.style.height = `${leftTabsWidth}px`;
+        const topTabsHeight = this.hasTopTabs
+            ? StickyContainer._tabsHeight
+            : 0;
 
-        this._rightTabsContainer.style.width = `${height}px`;
-        this._rightTabsContainer.style.height = `${rightTabsWidth}px`;
+        const dockingWidth: number = width - leftTabsWidth - rightTabsWidth;
+        const dockingHeight: number = height - bottomTabsHeight - topTabsHeight;
 
-        this._dockManager.context.model.rootNode.container.resize(
-            width - leftTabsWidth - rightTabsWidth, 
-            height - bottomTabsHeight); 
-    }
+        this._dockManager.context.model.rootNode.container.resize(dockingWidth, dockingHeight); 
 
-    public async pinLeftAsync(panelContainer: PanelContainer): Promise<void> {
-        await panelContainer.close();
-        const tab = document.createElement('div');
-        tab.style.border = 'solid 1px black';
-        tab.style.backgroundColor = 'orange';
-        tab.style.height = '100%';
-        tab.append(panelContainer.getRawTitle());
-        this._leftTabsContainer.append(tab);
+        const rect = this.element.getBoundingClientRect();
 
-        this._leftTabs.push({
-            container: panelContainer,
-            tabElement: tab
-        });
+        for (const left of this._leftTabs) {
+            const stickyPanel = left.container.floatingPanel as StickyPanel;
 
-        if (this._leftTabs.length == 1) {
-            this.resize(this.element.clientWidth, this.element.clientHeight);
+            stickyPanel.setPosition(rect.left + StickyContainer._tabsWidth, rect.top + topTabsHeight);
+
+            stickyPanel.resize(
+               Math.min(dockingWidth, stickyPanel.width),
+                dockingHeight);
         }
 
-        const rect: DOMRect = this.dockingArea.getBoundingClientRect();
+        for (const right of this._rightTabs) {
+            const stickyPanel = right.container.floatingPanel as StickyPanel;
 
-        const dialog = new StickyPanel(
+            const width: number = Math.min(dockingWidth, stickyPanel.width);
+            stickyPanel.setPosition(rect.right - StickyContainer._tabsWidth - width, rect.top + topTabsHeight);
+
+            stickyPanel.resize(
+                width,
+                dockingHeight);
+        }
+
+        for (const top of this._topTabs) {
+            const stickyPanel = top.container.floatingPanel as StickyPanel;
+            
+            stickyPanel.setPosition(rect.left + leftTabsWidth, rect.top + StickyContainer._tabsHeight);
+            stickyPanel.resize(
+                dockingWidth,
+                Math.min(dockingHeight, stickyPanel.height));
+        }
+
+        for (const bottom of this._bottomTabs) {
+            const stickyPanel = bottom.container.floatingPanel as StickyPanel;
+
+            const height: number = Math.min(dockingHeight, stickyPanel.height);
+            stickyPanel.setPosition(rect.left + leftTabsWidth, rect.bottom - StickyContainer._tabsHeight - height);
+            stickyPanel.resize(
+                dockingWidth,
+                height);
+        }
+    }
+
+    private _createTabHandle(stickyPanel: StickyPanel): HTMLDivElement {
+        const tab = document.createElement('div');
+        tab.classList.add('disable-selection');
+        tab.style.border = 'solid 1px black';
+        tab.style.backgroundColor = 'orange';
+        tab.append(stickyPanel.panel.title);
+
+        tab.onclick = () => {
+            if (stickyPanel.isHidden) {
+                stickyPanel.show();
+            }
+            else {
+                stickyPanel.hide();
+            }
+        };
+
+        return tab;
+    }
+
+    private async _pinAsync(
+        panelContainer: PanelContainer, 
+        tabsContainer: HTMLElement, 
+        tabs: Array<StickyTabContext>,
+        resizeDirection: ResizeDirection
+    ): Promise<void> {
+        await panelContainer.close();
+
+        const stickyPanel = new StickyPanel(
             panelContainer, 
             this._dockManager,
             this,
-            rect.x,
-            rect.y,
-            ResizeDirection.East);
+            resizeDirection);
 
-        tab.onclick = () => {
-            if (dialog.isHidden) {
-                dialog.show();
-            }
-            else {
-                dialog.hide();
-            }
-        };
+        const tabHandle: HTMLDivElement = this._createTabHandle(stickyPanel);
+        tabsContainer.append(tabHandle);
+
+        tabs.push({
+            tabElement: tabHandle,
+            container: panelContainer
+        });
+
+        if (tabs.length == 1) {
+            this.resize(this.element.clientWidth, this.element.clientHeight);
+        }
+        
+        stickyPanel.initialize();
+    }
+
+    public async pinRightAsync(panelContainer: PanelContainer): Promise<void> {
+        await this._pinAsync(
+            panelContainer,
+            this._rightTabsContainer,
+            this._rightTabs,
+            ResizeDirection.West);
+    }
+
+    public async pinTopAsync(panelContainer: PanelContainer): Promise<void> {
+        await this._pinAsync(
+            panelContainer,
+            this._topTabsContainer,
+            this._topTabs,
+            ResizeDirection.South);
+    }
+
+    public async pinBottomAsync(panelContainer: PanelContainer): Promise<void> {
+        await this._pinAsync(
+            panelContainer,
+            this._bottomTabsContainer,
+            this._bottomTabs,
+            ResizeDirection.North);
+    }
+
+    public async pinLeftAsync(panelContainer: PanelContainer): Promise<void> {
+        await this._pinAsync(
+            panelContainer,
+            this._leftTabsContainer,
+            this._leftTabs,
+            ResizeDirection.East);
     }
 
     public closeTab(panelContainer: PanelContainer): void {

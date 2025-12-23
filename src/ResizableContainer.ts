@@ -27,6 +27,7 @@ export class ResizableContainer implements IDockContainer {
     dockSpawnResizedEvent: CustomEvent<{}>;
     resizeHandles: ResizeHandle[];
     previousMousePosition: Point;
+    onUserResize?: (width: number, height: number) => void;
     private iframeEventHandlers: EventHandler[];
     private resizeDirection: ResizeDirection;
 
@@ -311,5 +312,6 @@ export class ResizableContainer implements IDockContainer {
         this.topLevelElement.style.top = bounds.top + 'px';
 
         this.resize(bounds.width, bounds.height);
+        this.onUserResize?.(bounds.width, bounds.height);
     }
 }
