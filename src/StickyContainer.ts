@@ -155,8 +155,6 @@ export class StickyContainer {
     private _createTabHandle(stickyPanel: StickyPanel): HTMLDivElement {
         const tab = document.createElement('div');
         tab.classList.add('disable-selection');
-        tab.style.border = 'solid 1px black';
-        tab.style.backgroundColor = 'orange';
         tab.append(stickyPanel.panel.title);
 
         tab.onclick = () => {
@@ -193,10 +191,8 @@ export class StickyContainer {
             container: panelContainer
         });
 
-        if (tabs.length == 1) {
-            this.resize(this.element.clientWidth, this.element.clientHeight);
-        }
-        
+        this.resize(this.element.clientWidth, this.element.clientHeight);
+
         stickyPanel.initialize();
     }
 
