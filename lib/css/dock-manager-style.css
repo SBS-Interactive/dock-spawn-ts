@@ -188,3 +188,16 @@
 .dockspan-panel-titlebar-text-active {
 	color: white;
 }
+
+
+
+.dockspawn-sticky-tabrow > * {
+	/* background-color: #333;
+	color:#aaa; */
+	text-decoration-color: #606060;
+}
+
+
+.dockspawn-sticky-tabrow>*:hover {
+	text-decoration-color: #008749;
+}

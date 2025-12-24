@@ -9,13 +9,13 @@ import { ResizableContainer } from './ResizableContainer.js';
 import { StickyContainer } from './StickyContainer.js';
 
 export class StickyPanel extends FloatingPanel {
-    private readonly _stickyContainer;
+    private readonly _stickyContainer: StickyContainer;
     private readonly _activePanelListener: ILayoutEventListener;
     private readonly _resizableContainer: ResizableContainer;
     private readonly _resizeCache: BufferedResizeDecorator;
 
-    public static defaultPanelWidth: number = 400;
-    public static defaultPanelHeight: number = 250;
+    public static DefaultPanelWidth: number = 400;
+    public static DefaultPanelHeight: number = 250;
 
     constructor(
         panel: PanelContainer, 
@@ -34,8 +34,8 @@ export class StickyPanel extends FloatingPanel {
             }
         }    
         
-        panel.width = StickyPanel.defaultPanelWidth;
-        panel.height = StickyPanel.defaultPanelHeight;
+        panel.width = StickyPanel.DefaultPanelWidth;
+        panel.height = StickyPanel.DefaultPanelHeight;
 
         this._resizableContainer = new ResizableContainer(
             this,
@@ -94,7 +94,7 @@ export class StickyPanel extends FloatingPanel {
         const dockButton = document.createElement('div');
         dockButton.innerText = Localizer.getString('Dock');
         dockButton.onclick = () => {
-            console.log('TODO');
+            this._stickyContainer.dockBack(this.panel);
             this.panel.closeContextMenu();
         };
 
