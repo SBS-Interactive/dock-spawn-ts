@@ -86,14 +86,19 @@ export class StickyPanel extends FloatingPanel {
     }
 
     public override close(): void {
-        super.close();
+        this.performClose();
         this._stickyContainer.closeTab(this.panel);
+    }
+
+    public performClose(): void {
+        super.close();
     }
 
     public override createContextMenuItems(): Array<Node> {
         const dockButton = document.createElement('div');
         dockButton.innerText = Localizer.getString('Dock');
         dockButton.onclick = () => {
+            this.performClose();
             this._stickyContainer.dockBack(this.panel);
             this.panel.closeContextMenu();
         };

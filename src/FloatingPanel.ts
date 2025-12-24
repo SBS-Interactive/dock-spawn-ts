@@ -121,6 +121,7 @@ export abstract class FloatingPanel implements IContextMenuProvider {
         Utils.removeNode(this.element);
         Utils.removeNode(this.panel.elementPanel);
         this.panel.floatingPanel = undefined;
+        this.panel.elementContentContainer.style.display = 'block';
     }
 
     public resize(width: number, height: number): void {
