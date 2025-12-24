@@ -13,6 +13,7 @@ export class StickyPanel extends FloatingPanel {
     private readonly _activePanelListener: ILayoutEventListener;
     private readonly _resizableContainer: ResizableContainer;
     private readonly _resizeCache: BufferedResizeDecorator;
+    private readonly _position: 'left' | 'right' | 'top' | 'bottom';
 
     public static DefaultPanelWidth: number = 400;
     public static DefaultPanelHeight: number = 250;
@@ -21,10 +22,12 @@ export class StickyPanel extends FloatingPanel {
         panel: PanelContainer, 
         dockManager: DockManager,
         stickyContainer: StickyContainer,
-        resizeDirection: ResizeDirection
+        resizeDirection: ResizeDirection,
+        position: 'left' | 'right' | 'top' | 'bottom'
     ) {
         super(panel, dockManager);
 
+        this._position = position;
         this._stickyContainer = stickyContainer;
         this._activePanelListener = {
             onActivePanelChange: (_dockManager, panel) => {
@@ -44,8 +47,6 @@ export class StickyPanel extends FloatingPanel {
             resizeDirection);
 
         this._resizeCache = new BufferedResizeDecorator(this._resizableContainer);
-
-
         this._resizableContainer.onUserResize = (width, height) => this._resizeCache.resize(width, height);
 
         this.decoratedContainer = this._resizeCache;
@@ -58,6 +59,10 @@ export class StickyPanel extends FloatingPanel {
 
     public override initialize(): void {
         super.initialize();
+        this.element.classList.add(
+            'dockspawn-sticky-panel', 
+            `dockspawn-sticky-panel-${this._position}`);
+
         this.hide();
     }
 
