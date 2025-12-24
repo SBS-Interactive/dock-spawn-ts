@@ -10,7 +10,9 @@ import { Dialog } from "./Dialog.js";
 import { Utils } from "./Utils.js";
 import { IPanelInfo } from "./interfaces/IPanelInfo.js";
 import { INodeInfo } from "./interfaces/INodeInfo.js";
+import { IState } from "./interfaces/IState.js";
 import { IDockContainer } from "./interfaces/IDockContainer.js";
+import { StickyPanel } from "./index-webcomponent.js";
 
 /**
  * Deserializes the dock layout hierarchy from JSON and creates a dock hierarhcy graph
@@ -29,6 +31,7 @@ export class DockGraphDeserializer {
         let model = new DockModel();
         model.rootNode = await this._buildGraph(info.graphInfo);
         model.dialogs = await this._buildDialogs(info.dialogsInfo);
+        model.stickyPanels = await this._buildStickyPanels(info.stickyPanels);
         model.documentManagerNode = this.documentManagerNode;
         return model;
     }
@@ -132,5 +135,26 @@ export class DockGraphDeserializer {
 
         }
         return dialogs;
+    }
+
+    async _buildStickyPanels(stickyPanelsInfo: Record<'top' | 'bottom' | 'left' | 'right', IState>) {
+        const result = {
+            'top': [],
+            'bottom': [],
+            'left': [],
+            'right': []
+        };
+
+        for (const direction of ['top', 'bottom', 'left', 'right']) {
+            for (const panelState of stickyPanelsInfo[direction]) {
+                const container = await PanelContainer.loadFromState(panelState, this.dockManager);
+
+                //Utils.removeNode(container.elementPanel);
+                let stickyPanel = new StickyPanel(container, this.dockManager, this.dockManager.stickyContainer, 1, 'left');
+                result.left.push(stickyPanel);
+            }
+        }
+
+        return result;
     }
 }

@@ -4,6 +4,7 @@ import { Dialog } from "./Dialog.js";
 import { IPanelInfo } from "./interfaces/IPanelInfo.js";
 import { INodeInfo } from "./interfaces/INodeInfo.js";
 import { IState } from "./interfaces/IState.js";
+import { StickyPanel } from "./index-webcomponent.js";
 
 /**
  * The serializer saves / loads the state of the dock layout hierarchy
@@ -13,7 +14,14 @@ export class DockGraphSerializer {
     serialize(model: DockModel) {
         let graphInfo = this._buildGraphInfo(model.rootNode);
         let dialogs = this._buildDialogsInfo(model.dialogs.sort((x,y)=><number><any>x.elementDialog.style.zIndex-<number><any>y.elementDialog.style.zIndex));
-        return JSON.stringify({ graphInfo: graphInfo, dialogsInfo: dialogs });
+        let stickyPanels = {
+            left: this._buildStickyPanelsInfo(model.stickyPanels.left),
+            right: this._buildStickyPanelsInfo(model.stickyPanels.right),
+            top: this._buildStickyPanelsInfo(model.stickyPanels.top),
+            bottom: this._buildStickyPanelsInfo(model.stickyPanels.bottom)
+        };
+
+        return JSON.stringify({ graphInfo: graphInfo, dialogsInfo: dialogs, stickyPanels: stickyPanels });
     }
 
     _buildGraphInfo(node: DockNode): INodeInfo {
@@ -50,5 +58,14 @@ export class DockGraphSerializer {
         });
 
         return dialogsInfo;
+    }
+
+    _buildStickyPanelsInfo(panels: StickyPanel[]): IState[] {
+        return panels.map(p => {
+            let panelState: IState = {};
+            p.panel.saveState(panelState);
+
+            return panelState;
+        });
     }
 }
