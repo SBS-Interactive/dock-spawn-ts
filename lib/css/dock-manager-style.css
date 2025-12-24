@@ -192,12 +192,31 @@
 
 
 .dockspawn-sticky-tabrow > * {
-	/* background-color: #333;
-	color:#aaa; */
-	text-decoration-color: #606060;
+	text-decoration-color: #D5D5D5;
 }
 
 
 .dockspawn-sticky-tabrow>*:hover {
 	text-decoration-color: #008749;
+}
+
+
+.dockspawn-sticky-panel {
+	border: solid 2px #008749;
+}
+
+.dockspawn-sticky-panel-left {
+	box-shadow: 5px 0 20px -10px black;
+}
+
+.dockspawn-sticky-panel-right {
+	box-shadow: -5px 0 20px -10px black;
+}
+
+.dockspawn-sticky-panel-bottom {
+	box-shadow: 0 -5px 20px -10px black;
+}
+
+.dockspawn-sticky-panel-top {
+	box-shadow: 0 5px 20px -10px black;
 }
