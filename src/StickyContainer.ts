@@ -1,8 +1,10 @@
 import { DockManager } from './DockManager.js';
 import { DockNode } from './DockNode.js';
 import { ResizeDirection } from './enums/ResizeDirection.js';
+import { HorizontalDockContainer } from './HorizontalDockContainer.js';
 import { PanelContainer } from './PanelContainer.js';
 import { StickyPanel } from './StickyPanel.js';
+import { VerticalDockContainer } from './VerticalDockContainer.js';
 
 type StickyTabContext = {
     container: PanelContainer;
@@ -15,7 +17,7 @@ export class StickyContainer {
 
     public readonly element: HTMLElement;
     public readonly dockingArea: HTMLElement;
-    
+
     private readonly _dockManager: DockManager;
     private readonly _bottomTabsContainer: HTMLElement;
     private readonly _leftTabsContainer: HTMLElement;
@@ -52,7 +54,7 @@ export class StickyContainer {
         this._leftTabsContainer = document.createElement('div');
         this._leftTabsContainer.classList.add(
             'dockspawn-sticky-tabrow',
-            'dockspawn-sticky-tabrow-vertical', 
+            'dockspawn-sticky-tabrow-vertical',
             'dockspawn-sticky-tabrow-left');
 
         this._rightTabsContainer = document.createElement('div');
@@ -107,7 +109,7 @@ export class StickyContainer {
         const dockingWidth: number = width - leftTabsWidth - rightTabsWidth;
         const dockingHeight: number = height - bottomTabsHeight - topTabsHeight;
 
-        this._dockManager.context.model.rootNode.container.resize(dockingWidth, dockingHeight); 
+        this._dockManager.context.model.rootNode.container.resize(dockingWidth, dockingHeight);
 
         const rect = this.element.getBoundingClientRect();
 
@@ -117,7 +119,7 @@ export class StickyContainer {
             stickyPanel.setPosition(rect.left + StickyContainer.TabsWidth, rect.top + topTabsHeight);
 
             stickyPanel.resize(
-               Math.min(dockingWidth, stickyPanel.width),
+                Math.min(dockingWidth, stickyPanel.width),
                 dockingHeight);
         }
 
@@ -134,7 +136,7 @@ export class StickyContainer {
 
         for (const top of this._topTabs) {
             const stickyPanel = top.container.floatingPanel as StickyPanel;
-            
+
             stickyPanel.setPosition(rect.left + leftTabsWidth, rect.top + StickyContainer.TabsHeight);
             stickyPanel.resize(
                 dockingWidth,
@@ -188,6 +190,61 @@ export class StickyContainer {
             ResizeDirection.East);
     }
 
+    public async pinAutoDirection(panelContainer: PanelContainer): Promise<void> {
+        const node: DockNode = this._dockManager.findNodeFromContainerElement(panelContainer.containerElement);
+        const documentManagerNode: DockNode = this._dockManager.context.model.documentManagerNode;
+
+        //If the PanelContainer is not already docked, pin it left by default
+        if (!node) {
+            await this.pinLeftAsync(panelContainer);
+            return;
+        }
+
+        const ancestors: Map<DockNode, number> = new Map();
+
+        let currentNode: DockNode = node;
+
+        while (currentNode.parent) {
+            ancestors.set(currentNode.parent, currentNode.parent.children.indexOf(currentNode));
+            currentNode = currentNode.parent;
+        }
+        
+        let lowestCommonAncestor: DockNode = documentManagerNode;
+        let documentPosition: number = -1;
+
+        while (lowestCommonAncestor && !ancestors.has(lowestCommonAncestor)) {
+            documentPosition = lowestCommonAncestor.parent?.children.indexOf(lowestCommonAncestor);
+            lowestCommonAncestor = lowestCommonAncestor.parent;
+        }
+
+        if (!lowestCommonAncestor) {
+            await this.pinLeftAsync(panelContainer);
+            return;
+        }
+
+        const nodeIsBeforeDocuments: boolean = ancestors.get(lowestCommonAncestor) < documentPosition;
+
+        if (lowestCommonAncestor.container instanceof HorizontalDockContainer) {
+            if (nodeIsBeforeDocuments) {
+                await this.pinLeftAsync(panelContainer);
+            }
+            else {
+                await this.pinRightAsync(panelContainer);
+            }
+        }
+        else if (lowestCommonAncestor.container instanceof VerticalDockContainer) {
+            if (nodeIsBeforeDocuments) {
+                await this.pinTopAsync(panelContainer);
+            }
+            else {
+                await this.pinBottomAsync(panelContainer);
+            }
+        }
+        else {
+            await this.pinLeftAsync(panelContainer);
+        } 
+    }
+
     public closeTab(panelContainer: PanelContainer): void {
         this._tryCloseTab(panelContainer, this._leftTabs)
             || this._tryCloseTab(panelContainer, this._rightTabs)
@@ -200,7 +257,7 @@ export class StickyContainer {
 
         if (this._tryCloseTab(panelContainer, this._leftTabs)) {
             this._dockManager.dockLeft(
-                rootNode, 
+                rootNode,
                 panelContainer,
                 panelContainer.width / this.dockingArea.clientWidth);
         }
@@ -220,7 +277,7 @@ export class StickyContainer {
             this._dockManager.dockDown(
                 rootNode,
                 panelContainer,
-                panelContainer.height / this.dockingArea.clientHeight);    
+                panelContainer.height / this.dockingArea.clientHeight);
         }
     }
 
@@ -260,15 +317,15 @@ export class StickyContainer {
     }
 
     private async _pinAsync(
-        panelContainer: PanelContainer, 
-        tabsContainer: HTMLElement, 
+        panelContainer: PanelContainer,
+        tabsContainer: HTMLElement,
         tabs: Array<StickyTabContext>,
         resizeDirection: ResizeDirection
     ): Promise<void> {
         await panelContainer.close();
 
         const stickyPanel = new StickyPanel(
-            panelContainer, 
+            panelContainer,
             this._dockManager,
             this,
             resizeDirection);
