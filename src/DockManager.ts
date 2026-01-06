@@ -239,6 +239,8 @@ export class DockManager {
 
         this.rebuildLayout(model.rootNode);
         this.loadResize(model.rootNode);
+
+        this.stickyContainer.reloadModel();
         // this.invalidate();
     }
 
